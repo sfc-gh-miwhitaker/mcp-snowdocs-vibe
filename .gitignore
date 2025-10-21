@@ -1,0 +1,28 @@
+# Diagnostic and troubleshooting scripts
+.diagnostic_scripts/
+
+# Cursor internal files (per user rules)
+.cursor/
+.cursornotes/
+
+# User-specific MCP configurations (contains tokens)
+*.json.backup.*
+CONFIGURATION.txt
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+
