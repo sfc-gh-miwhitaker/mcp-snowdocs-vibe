@@ -27,11 +27,19 @@
 -- # PART 1: Create MCP Server Infrastructure (if needed)
 -- ###########################################################################
 
--- Accept Snowflake Documentation share (one-time, requires ACCOUNTADMIN)
+-- Accept Snowflake Documentation from Marketplace (requires ACCOUNTADMIN)
 USE ROLE ACCOUNTADMIN;
-CREATE DATABASE IF NOT EXISTS SNOWFLAKE_DOCUMENTATION 
-  FROM SHARE SNO_ACCOUNT.SNO_COMMON.DOCS_SHARE
-  COMMENT = 'Snowflake documentation for MCP server';
+
+-- Accept legal terms for Snowflake Documentation marketplace listing
+CALL SYSTEM$ACCEPT_LEGAL_TERMS('DATA_EXCHANGE_LISTING', 'GZSTZ67BY9OQ4');
+
+-- Import Snowflake Documentation database from Marketplace
+CREATE OR REPLACE DATABASE SNOWFLAKE_DOCUMENTATION
+  FROM LISTING IDENTIFIER('"GZSTZ67BY9OQ4"');
+
+-- Grant IMPORTED PRIVILEGES to PUBLIC role for MCP access
+-- NOTE: To restrict access, replace PUBLIC with your custom role
+GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE_DOCUMENTATION TO ROLE PUBLIC;
 
 -- Create MCP server infrastructure (requires SYSADMIN)
 USE ROLE SYSADMIN;
