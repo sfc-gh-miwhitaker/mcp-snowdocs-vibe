@@ -106,7 +106,7 @@ USE ROLE SYSADMIN;
 -- Check your PAT tokens
 -- EXPECTED: Should show at least one token (likely named MCP_PAT_*)
 -- NOTE: This will NOT show TOKEN_SECRET (that's only shown at creation time)
-SHOW PROGRAMMATIC ACCESS TOKENS;
+SHOW USER PROGRAMMATIC ACCESS TOKENS;
 
 -- ###########################################################################
 -- # STEP 8: Display MCP Server URL

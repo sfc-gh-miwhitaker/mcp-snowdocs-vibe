@@ -71,8 +71,8 @@ SHOW SCHEMAS IN DATABASE SNOWFLAKE_INTELLIGENCE;
 SHOW DATABASES LIKE 'SNOWFLAKE_DOCUMENTATION';
 
 -- Verify your PAT tokens still exist (PRESERVED)
--- Note: Replace CURRENT_USER() with your actual username if this fails
-SHOW PROGRAMMATIC ACCESS TOKENS;
+-- Note: Shows tokens for current user
+SHOW USER PROGRAMMATIC ACCESS TOKENS;
 
 -- ###########################################################################
 -- # OPTIONAL: Manual PAT Token Cleanup
@@ -84,7 +84,7 @@ PAT TOKENS ARE PRESERVED BY DEFAULT
 If you want to remove PAT tokens manually (use with caution):
 
 1. View your tokens:
-   SHOW PROGRAMMATIC ACCESS TOKENS;
+   SHOW USER PROGRAMMATIC ACCESS TOKENS;
 
 2. Drop a specific token by name:
    SET token_to_drop = 'MCP_PAT_20251021_123456';
