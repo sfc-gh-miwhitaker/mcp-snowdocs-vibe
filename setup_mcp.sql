@@ -17,20 +17,25 @@
  */
 
 -- ###########################################################################
--- # PREREQUISITE: Ensure MCP Server Exists
+-- # PREREQUISITE: Create MCP Server (FIRST TIME ONLY)
 -- ###########################################################################
 --
--- This script assumes the MCP server has already been created.
--- If you get "object does not exist" errors, you need to create it first:
---
+-- ⚠️  IMPORTANT: If this is your FIRST TIME running this script, you must
+--    create the MCP server first. Uncomment and run these commands ONCE:
+
+-- STEP 1: Accept the Snowflake Documentation share (requires ACCOUNTADMIN)
 -- USE ROLE ACCOUNTADMIN;
--- CREATE OR REPLACE DATABASE SNOWFLAKE_DOCUMENTATION 
+-- CREATE DATABASE IF NOT EXISTS SNOWFLAKE_DOCUMENTATION 
 --   FROM SHARE SNO_ACCOUNT.SNO_COMMON.DOCS_SHARE;
---
+
+-- STEP 2: Create the MCP server (requires SYSADMIN)
 -- USE ROLE SYSADMIN;
+-- CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
+-- CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.MCP;
 -- CREATE OR REPLACE MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
 --   AS CORTEX SEARCH SERVICE SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE;
---
+
+-- After creating the MCP server above, continue with the rest of this script.
 -- ###########################################################################
 
 -- ###########################################################################

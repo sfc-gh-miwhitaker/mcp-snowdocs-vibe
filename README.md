@@ -6,12 +6,17 @@ This repository provides a production-ready SQL script to provision a [Model Con
 
 ---
 
-> 👋 **First time here?** Follow these 3 files in order:
+> 👋 **First time here?** Follow these files in order:
+> 
+> **One-time setup (if MCP server doesn't exist):**
+> 1. [`create_mcp_server.sql`](create_mcp_server.sql) - Creates MCP server infrastructure (1 min, once per account)
+> 
+> **Every user setup:**
 > 1. [`create_token.sql`](create_token.sql) - Creates your access token (1 min)
-> 2. [`setup_mcp.sql`](setup_mcp.sql) - Configures MCP server (1 min)
+> 2. [`setup_mcp.sql`](setup_mcp.sql) - Configures MCP access (1 min)
 > 3. [`test_connection.sh`](test_connection.sh) - Verifies everything works (1 min)
 > 
-> Each file has instructions inside. Takes 5 minutes total.
+> Each file has instructions inside. Takes 5-7 minutes total.
 > 
 > **Or** see [`help/GETTING_STARTED.md`](help/GETTING_STARTED.md) for a visual step-by-step guide.
 
@@ -20,9 +25,26 @@ This repository provides a production-ready SQL script to provision a [Model Con
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Snowflake account with `SYSADMIN` and `SECURITYADMIN` roles
-- Snowflake Marketplace access (one-time `ACCOUNTADMIN` for terms acceptance)
+- Snowflake account with `ACCOUNTADMIN`, `SYSADMIN`, and `SECURITYADMIN` roles
+- Snowflake Marketplace access (for accepting documentation share)
 - MCP-compatible IDE: **Cursor**, **Claude Desktop**, **VS Code** (with Continue.dev), **Zed**, or [others](https://modelcontextprotocol.io/implementations)
+
+---
+
+### **Step 0: Create MCP Server** (One-time, if it doesn't exist)
+
+Open [`create_mcp_server.sql`](create_mcp_server.sql) in Snowsight.
+
+1. Click "Run All"
+2. Verify "✅ MCP server created successfully!" appears
+3. **Skip this step if the MCP server already exists in your account**
+
+**What this script does:**
+- Accepts Snowflake documentation share (requires `ACCOUNTADMIN`)
+- Creates `SNOWFLAKE_INTELLIGENCE` database and `MCP` schema
+- Creates the MCP server that exposes Snowflake docs
+
+**⚠️ Note:** If you get "Agent Server does not exist" error in Step 2, run this script first.
 
 ---
 
@@ -227,8 +249,9 @@ See [`help/SECURITY.md`](help/SECURITY.md) for detailed analysis.
 
 ```
 .
-├── create_token.sql            # Step 1: Create access token (simplified naming)
-├── setup_mcp.sql               # Step 2: Configure MCP server with minimal privileges
+├── create_mcp_server.sql       # Step 0: Create MCP server (one-time per account)
+├── create_token.sql            # Step 1: Create access token
+├── setup_mcp.sql               # Step 2: Configure MCP access with minimal privileges
 ├── cleanup_mcp.sql             # Cleanup: Remove MCP resources (preserves infrastructure)
 ├── test_connection.sh          # Test: Verify connection works
 ├── troubleshoot.sql            # Troubleshoot: Debug authorization issues
@@ -291,30 +314,17 @@ ALTER USER CURRENT_USER() DROP PROGRAMMATIC ACCESS TOKEN <token_name>;
 3. Verify role is assigned to your user
 4. Re-run [`setup_mcp.sql`](setup_mcp.sql) if needed (it's idempotent)
 
-### HTTP 404: MCP Server Not Found
+### HTTP 404 or "Agent Server does not exist"
 
-**Cause:** MCP server doesn't exist or URL is wrong
+**Cause:** MCP server hasn't been created yet
 
 **Fix:**
+1. Run [`create_mcp_server.sql`](create_mcp_server.sql) to create the MCP server
+2. Then run [`setup_mcp.sql`](setup_mcp.sql) to configure access
+3. Verify with:
 ```sql
--- Check if server exists
-USE DATABASE SNOWFLAKE_INTELLIGENCE;
-USE SCHEMA MCP;
-SHOW MCP SERVERS;
+SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
 ```
-
-If missing, create it:
-```sql
-USE ROLE ACCOUNTADMIN;
-CREATE OR REPLACE DATABASE SNOWFLAKE_DOCUMENTATION 
-  FROM SHARE SNO_ACCOUNT.SNO_COMMON.DOCS_SHARE;
-
-USE ROLE SYSADMIN;
-CREATE OR REPLACE MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
-  AS CORTEX SEARCH SERVICE SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE;
-```
-
-Then run [`setup_mcp.sql`](setup_mcp.sql) again.
 
 ### SSL Certificate Error
 
