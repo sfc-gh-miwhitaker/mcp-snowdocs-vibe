@@ -11,6 +11,13 @@ set -e
 # Use organization-based URL format, not account locator format
 # Correct format: https://orgname-accountname.snowflakecomputing.com
 # Incorrect format: https://account.region.snowflakecomputing.com (will cause SSL errors)
+#
+# To get your correct MCP URL, run this SQL query in Snowflake:
+#   SELECT 'https://' || LOWER(CURRENT_ORGANIZATION_NAME()) || '-' || LOWER(CURRENT_ACCOUNT_NAME()) || '.snowflakecomputing.com/api/v2/databases/snowflake_intelligence/schemas/mcp/mcp-servers/snowflake_mcp_server' AS mcp_url;
+#
+# To get your hostname, run this SQL query in Snowflake:
+#   SELECT LOWER(CURRENT_ORGANIZATION_NAME()) || '-' || LOWER(CURRENT_ACCOUNT_NAME()) || '.snowflakecomputing.com' AS hostname;
+#
 MCP_URL="https://YOUR_ORG-YOUR_ACCOUNT.snowflakecomputing.com/api/v2/databases/snowflake_intelligence/schemas/mcp/mcp-servers/snowflake_mcp_server"
 HOSTNAME="YOUR_ORG-YOUR_ACCOUNT.snowflakecomputing.com"
 

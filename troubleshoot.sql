@@ -55,9 +55,12 @@ SHOW GRANTS TO ROLE MCP_ACCESS_ROLE;
 -- # STEP 3: Check Your User Has MCP_ACCESS_ROLE
 -- ###########################################################################
 
+-- Get current user name
+SET session_user_name = (SELECT CURRENT_USER());
+
 -- Check current user's role grants
 -- EXPECTED: Should show MCP_ACCESS_ROLE among your assigned roles
-SHOW GRANTS TO USER CURRENT_USER();
+SHOW GRANTS TO USER IDENTIFIER($session_user_name);
 
 -- ###########################################################################
 -- # STEP 4: Check Cortex Search Service Access
