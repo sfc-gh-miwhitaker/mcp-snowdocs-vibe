@@ -1,6 +1,6 @@
-# 🎯 START HERE
+# 🎯 Getting Started
 
-## You are 4 simple steps away from a working Snowflake MCP server
+## You are 3 simple steps away from a working Snowflake MCP server
 
 ### Current Status
 - ✅ You have a Snowflake account
@@ -11,7 +11,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  STEP 1: Run create_pat_token.sql in Snowsight              │
+│  STEP 1: Run create_token.sql in Snowsight                  │
 │  ├─ Click "Run All"                                         │
 │  ├─ Find result with "TOKEN_SECRET" column                  │
 │  └─ COPY TOKEN_SECRET immediately!                          │
@@ -20,7 +20,7 @@
 └─────────────────────────────────────────────────────────────┘
                              ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  STEP 2: Run secure_pat_setup.sql in Snowsight              │
+│  STEP 2: Run setup_mcp.sql in Snowsight                     │
 │  ├─ Click "Run All"                                         │
 │  ├─ Find result with "mcp_url" column                       │
 │  └─ COPY mcp_url                                            │
@@ -29,25 +29,9 @@
 └─────────────────────────────────────────────────────────────┘
                              ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  STEP 3: Update ~/.cursor/mcp.json                          │
-│  {                                                           │
-│    "mcpServers": {                                           │
-│      "Snowflake": {                                          │
-│        "url": "PASTE_YOUR_MCP_URL",                         │
-│        "headers": {                                          │
-│          "Authorization": "Bearer PASTE_YOUR_TOKEN_SECRET"  │
-│        }                                                     │
-│      }                                                       │
-│    }                                                         │
-│  }                                                           │
-│                                                              │
-│  Time: 1 minute                                              │
-└─────────────────────────────────────────────────────────────┘
-                             ↓
-┌─────────────────────────────────────────────────────────────┐
-│  STEP 4: Test                                                │
-│  ├─ Update verify_mcp_server.sh (lines 9-10)               │
-│  ├─ Run: ./verify_mcp_server.sh                            │
+│  STEP 3: Update ~/.cursor/mcp.json and test                 │
+│  ├─ Edit config with your URL and token                     │
+│  ├─ Optional: Run ./test_connection.sh to verify            │
 │  ├─ Restart Cursor (Cmd+Q)                                  │
 │  └─ Ask: "How do I create a dynamic table in Snowflake?"   │
 │                                                              │
@@ -61,25 +45,26 @@
 
 | File | Purpose | When to Use |
 |------|---------|-------------|
-| **create_pat_token.sql** | Create PAT token | **STEP 1** |
-| **secure_pat_setup.sql** | Configure MCP access | **STEP 2** |
-| verify_mcp_server.sh | Test connection | After Step 3 |
-| diagnose_pat_auth.sql | Troubleshooting | If HTTP 401 error |
-| secure_pat_teardown.sql | Remove everything | When cleaning up |
+| **create_token.sql** | Create access token | **STEP 1** |
+| **setup_mcp.sql** | Configure MCP server | **STEP 2** |
+| test_connection.sh | Test connection | After Step 2 (optional) |
+| troubleshoot.sql | Troubleshooting | If HTTP 401 error |
+| cleanup_mcp.sql | Remove MCP resources | When cleaning up (preserves infrastructure) |
 
 ### Files You Can Ignore
 
 - `README.md` - Full documentation (read later if needed)
-- `help/SECURITY_COMPARISON.md` - Security details (optional)
+- `help/SECURITY.md` - Security details (optional)
 - `LICENSE` - Apache 2.0 license
+- `CHANGELOG.md` - Version history
 - `.cursornotes/` - Internal notes (ignored by git)
 
 ---
 
 ## 🚨 Common Mistakes to Avoid
 
-1. ❌ **Running secure_pat_setup.sql without creating a PAT token first**
-   - ✅ Run create_pat_token.sql FIRST, then secure_pat_setup.sql
+1. ❌ **Running setup_mcp.sql without creating a token first**
+   - ✅ Run create_token.sql FIRST, then setup_mcp.sql
 
 2. ❌ **Forgetting to copy TOKEN_SECRET**
    - ✅ Copy it immediately when it appears (you can't retrieve it later!)
@@ -95,7 +80,7 @@
 ## 📞 Need Help?
 
 **HTTP 401 error?**
-→ Run `diagnose_pat_auth.sql` to check grants
+→ Run `troubleshoot.sql` to check grants
 
 **HTTP 404 error?**
 → MCP server doesn't exist - check README troubleshooting section
@@ -104,13 +89,13 @@
 → Using wrong URL - use exact URL from script output
 
 **Token expired?**
-→ Re-run `create_pat_token.sql` to create a new token
+→ Re-run `create_token.sql` to create a new token
 
 ---
 
 ## 🎯 Ready?
 
-**Open [`create_pat_token.sql`](../create_pat_token.sql) in Snowsight and click "Run All"!**
+**Open [`create_token.sql`](../create_token.sql) in Snowsight and click "Run All"!**
 
-Then follow with [`secure_pat_setup.sql`](../secure_pat_setup.sql). Each script is simple and runs in one click. You've got this! 🚀
+Then follow with [`setup_mcp.sql`](../setup_mcp.sql). Each script is simple and runs in one click. You've got this! 🚀
 

@@ -1,8 +1,9 @@
 /*
- * Name: create_pat_token.sql
+ * Name: create_token.sql
  * Synopsis: Create a Programmatic Access Token (PAT) for MCP server authentication
  * Author: M. Whitaker
  * Created: 2025-10-21
+ * Updated: 2025-10-22 (renamed from create_pat_token.sql)
  * 
  * HOW TO RUN:
  * 1. Click "Run All" in Snowsight
@@ -11,7 +12,7 @@
  * 4. Save it in your password manager - you cannot retrieve it later!
  * 
  * This token will have your current role's permissions.
- * After creating the token, run secure_pat_setup.sql to configure MCP access.
+ * After creating the token, run setup_mcp.sql to configure MCP access.
  */
 
 -- Get current user name
@@ -30,7 +31,7 @@ ALTER USER IDENTIFIER($session_user_name) ADD PROGRAMMATIC ACCESS TOKEN IDENTIFI
 NEXT STEPS:
 1. ✅ Copy the TOKEN_SECRET from the result above
 2. ✅ Save it in your password manager
-3. Run secure_pat_setup.sql to configure MCP server access
+3. Run setup_mcp.sql to configure MCP server access
 4. Use the TOKEN_SECRET in your MCP client configuration
 */
 

@@ -6,7 +6,18 @@ This repository provides a production-ready SQL script to provision a [Model Con
 
 ---
 
-## 🚀 Quick Start (4 Steps)
+> 👋 **First time here?** Follow these 3 files in order:
+> 1. [`create_token.sql`](create_token.sql) - Creates your access token (1 min)
+> 2. [`setup_mcp.sql`](setup_mcp.sql) - Configures MCP server (1 min)
+> 3. [`test_connection.sh`](test_connection.sh) - Verifies everything works (1 min)
+> 
+> Each file has instructions inside. Takes 5 minutes total.
+> 
+> **Or** see [`help/GETTING_STARTED.md`](help/GETTING_STARTED.md) for a visual step-by-step guide.
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
 - Snowflake account with `SYSADMIN` and `SECURITYADMIN` roles
@@ -15,18 +26,18 @@ This repository provides a production-ready SQL script to provision a [Model Con
 
 ---
 
-### **Step 1: Create PAT Token**
+### **Step 1: Create Token**
 
-Open [`create_pat_token.sql`](create_pat_token.sql) in Snowsight.
+Open [`create_token.sql`](create_token.sql) in Snowsight.
 
 1. Click "Run All"
 2. Look for the result with "TOKEN_SECRET" column
 3. **IMMEDIATELY copy the TOKEN_SECRET** value (starts with `eyJ...`)
 4. **Save it in your password manager** (you'll never see it again!)
 
-### **Step 2: Configure MCP Access**
+### **Step 2: Setup MCP Server**
 
-Open [`secure_pat_setup.sql`](secure_pat_setup.sql) in Snowsight.
+Open [`setup_mcp.sql`](setup_mcp.sql) in Snowsight.
 
 1. Click "Run All"
 2. Look for the result with "mcp_url" column
@@ -65,8 +76,8 @@ For **Claude Desktop**, edit `~/Library/Application Support/Claude/claude_deskto
 
 **Test from command line:**
 ```bash
-# Update verify_mcp_server.sh with your URL and token (lines 9-10)
-./verify_mcp_server.sh
+# Update test_connection.sh with your URL and token (lines 11-12)
+./test_connection.sh
 ```
 
 Expected: `✅ MCP Server: Ready and responding`
@@ -101,7 +112,7 @@ Attacker **CANNOT**:
 
 **Blast radius: MINIMAL** (documentation search only)
 
-See [`help/SECURITY_COMPARISON.md`](help/SECURITY_COMPARISON.md) for detailed analysis.
+See [`help/SECURITY.md`](help/SECURITY.md) for detailed analysis.
 
 ---
 
@@ -109,29 +120,45 @@ See [`help/SECURITY_COMPARISON.md`](help/SECURITY_COMPARISON.md) for detailed an
 
 ```
 .
-├── create_pat_token.sql        # Step 1: Create PAT token
-├── secure_pat_setup.sql        # Step 2: Configure MCP access with minimal privileges  
-├── secure_pat_teardown.sql     # Cleanup: Remove all MCP resources
-├── verify_mcp_server.sh        # Test: Verify connection works
-├── diagnose_pat_auth.sql       # Troubleshoot: Debug authorization issues
-├── README.md                   # Documentation (only .md in root per project rules)
+├── create_token.sql            # Step 1: Create access token (simplified naming)
+├── setup_mcp.sql               # Step 2: Configure MCP server with minimal privileges
+├── cleanup_mcp.sql             # Cleanup: Remove MCP resources (preserves infrastructure)
+├── test_connection.sh          # Test: Verify connection works
+├── troubleshoot.sql            # Troubleshoot: Debug authorization issues
+├── README.md                   # Main documentation
 └── help/                       # Additional documentation
-    ├── START_HERE.md           # Quick start visual guide
-    └── SECURITY_COMPARISON.md  # Security analysis
+    ├── GETTING_STARTED.md      # Visual step-by-step guide for beginners
+    └── SECURITY.md             # Security analysis and best practices
 ```
 
 ---
 
 ## 🧹 Cleanup
 
-To remove everything:
+To remove MCP server and role (preserves reusable infrastructure):
 
 ```sql
--- Execute secure_pat_teardown.sql in Snowflake
--- Drops MCP_ACCESS_ROLE and revokes all grants
+-- Execute cleanup_mcp.sql in Snowsight
+-- Removes:
+--   - MCP server (SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER)
+--   - MCP_ACCESS_ROLE and all grants
+-- Preserves:
+--   - SNOWFLAKE_INTELLIGENCE database and schemas (reusable)
+--   - SNOWFLAKE_DOCUMENTATION database (may be used by other examples)
+--   - PAT tokens (user-managed, may be used elsewhere)
 ```
 
-To remove just your PAT token:
+**What Gets Cleaned Up:**
+- ✅ MCP server object
+- ✅ MCP_ACCESS_ROLE (automatically revoked from users)
+
+**What Stays (Reusable Infrastructure):**
+- ✅ SNOWFLAKE_INTELLIGENCE database (shared across examples)
+- ✅ SNOWFLAKE_INTELLIGENCE.MCP schema (reusable)
+- ✅ SNOWFLAKE_DOCUMENTATION database (imported share)
+- ✅ PAT tokens (may be needed for other purposes)
+
+To remove your PAT token manually (optional):
 
 ```sql
 -- List your tokens
@@ -140,6 +167,8 @@ SHOW PROGRAMMATIC ACCESS TOKENS FOR USER CURRENT_USER();
 -- Drop specific token
 ALTER USER CURRENT_USER() DROP PROGRAMMATIC ACCESS TOKEN <token_name>;
 ```
+
+**Note:** PAT tokens are intentionally preserved because they may be used for other Snowflake integrations or examples.
 
 ---
 
@@ -150,10 +179,10 @@ ALTER USER CURRENT_USER() DROP PROGRAMMATIC ACCESS TOKEN <token_name>;
 **Cause:** PAT token missing required grants
 
 **Fix:**
-1. Run [`diagnose_pat_auth.sql`](diagnose_pat_auth.sql) to check grants
+1. Run [`troubleshoot.sql`](troubleshoot.sql) to check grants
 2. Verify `MCP_ACCESS_ROLE` exists and has 4 required grants
 3. Verify role is assigned to your user
-4. Re-run [`secure_pat_setup.sql`](secure_pat_setup.sql) if needed (it's idempotent)
+4. Re-run [`setup_mcp.sql`](setup_mcp.sql) if needed (it's idempotent)
 
 ### HTTP 404: MCP Server Not Found
 
@@ -178,7 +207,7 @@ CREATE OR REPLACE MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
   AS CORTEX SEARCH SERVICE SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE;
 ```
 
-Then run [`secure_pat_setup.sql`](secure_pat_setup.sql) again.
+Then run [`setup_mcp.sql`](setup_mcp.sql) again.
 
 ### SSL Certificate Error
 
@@ -195,7 +224,7 @@ Then run [`secure_pat_setup.sql`](secure_pat_setup.sql) again.
 -- Check expiry
 SHOW PROGRAMMATIC ACCESS TOKENS FOR USER CURRENT_USER();
 
--- Create new token by re-running PHASE 1 of secure_pat_setup.sql
+-- Create new token by re-running create_token.sql
 ```
 
 ### Cursor Doesn't Show MCP Tools
@@ -204,7 +233,7 @@ SHOW PROGRAMMATIC ACCESS TOKENS FOR USER CURRENT_USER();
 - [ ] Restarted Cursor after config change?
 - [ ] `~/.cursor/mcp.json` has valid JSON?
 - [ ] URL and token are correct (no typos)?
-- [ ] `verify_mcp_server.sh` shows HTTP 200?
+- [ ] `test_connection.sh` shows HTTP 200?
 
 ---
 
@@ -242,4 +271,4 @@ Apache License 2.0 - See [LICENSE](./LICENSE) file for details.
 - ❌ Complex multi-script setups
 - ❌ Security compromises
 
-**Start now:** See [`help/START_HERE.md`](help/START_HERE.md) for a visual guide, or open [`secure_pat_setup.sql`](secure_pat_setup.sql) directly! 🚀
+**Start now:** See [`help/GETTING_STARTED.md`](help/GETTING_STARTED.md) for a visual guide, or open [`create_token.sql`](create_token.sql) to begin! 🚀

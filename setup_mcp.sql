@@ -1,11 +1,12 @@
 /*
- * Name: secure_pat_setup.sql
+ * Name: setup_mcp.sql
  * Synopsis: Configure MCP server access with minimal privileges
  * Author: M. Whitaker
  * Created: 2025-10-21
+ * Updated: 2025-10-22 (renamed from secure_pat_setup.sql)
  * 
  * PREREQUISITE: You must have a PAT token already created
- * - If you don't have one, run create_pat_token.sql first
+ * - If you don't have one, run create_token.sql first
  * 
  * HOW TO RUN:
  * 1. Click "Run All" in Snowsight

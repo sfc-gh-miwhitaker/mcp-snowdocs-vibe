@@ -41,7 +41,7 @@ Based on Snowflake documentation and testing, the MCP server requires exactly:
 
 ### Step 1: Create Secure Setup
 
-Run [`secure_pat_setup.sql`](../secure_pat_setup.sql):
+Run [`setup_mcp.sql`](../setup_mcp.sql):
 
 ```sql
 -- Creates MCP_ACCESS_ROLE with minimal privileges
@@ -78,10 +78,10 @@ Update your `~/.cursor/mcp.json`:
 
 ### Step 4: Verify
 
-Run [`verify_mcp_server.sh`](../verify_mcp_server.sh):
+Run [`test_connection.sh`](../test_connection.sh):
 
 ```bash
-./verify_mcp_server.sh
+./test_connection.sh
 ```
 
 Should see: `✅ MCP Server: Ready and responding`
@@ -99,10 +99,17 @@ REVOKE USAGE ON SCHEMA SNOWFLAKE_INTELLIGENCE.MCP FROM ROLE PUBLIC;
 REVOKE IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE_DOCUMENTATION FROM ROLE PUBLIC;
 ```
 
-To remove the secure setup:
+To remove the MCP setup:
 
-```bash
-# Run secure_pat_teardown.sql to drop MCP_ACCESS_ROLE
+```sql
+-- Run cleanup_mcp.sql in Snowsight
+-- This removes:
+--   - MCP server (SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER)
+--   - MCP_ACCESS_ROLE (automatically revokes from users)
+-- This preserves:
+--   - SNOWFLAKE_INTELLIGENCE database and schemas (reusable)
+--   - SNOWFLAKE_DOCUMENTATION database (may be used by other examples)
+--   - PAT tokens (user-managed, may be needed elsewhere)
 ```
 
 ## Recommendation
@@ -128,5 +135,5 @@ The **secure approach** provides:
 4. ✅ **Compliance ready** - meets least privilege principle
 5. ✅ **Small blast radius** - compromised token has limited access
 
-**Use [`secure_pat_setup.sql`](../secure_pat_setup.sql) for production deployments.**
+**Use [`setup_mcp.sql`](../setup_mcp.sql) for production deployments.**
 

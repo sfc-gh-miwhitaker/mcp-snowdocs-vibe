@@ -1,7 +1,9 @@
 #!/bin/bash
-# Final verification that the MCP server is ready and responding
+# Name: test_connection.sh
+# Synopsis: Final verification that the MCP server is ready and responding
 # Author: M. Whitaker
-# Date: 2025-10-21
+# Created: 2025-10-21
+# Updated: 2025-10-22 (renamed from verify_mcp_server.sh)
 
 set -e
 
