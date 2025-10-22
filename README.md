@@ -6,17 +6,12 @@ This repository provides a production-ready SQL script to provision a [Model Con
 
 ---
 
-> 👋 **First time here?** Follow these files in order:
-> 
-> **One-time setup (if MCP server doesn't exist):**
-> 1. [`create_mcp_server.sql`](create_mcp_server.sql) - Creates MCP server infrastructure (1 min, once per account)
-> 
-> **Every user setup:**
+> 👋 **First time here?** Follow these 3 files in order:
 > 1. [`create_token.sql`](create_token.sql) - Creates your access token (1 min)
-> 2. [`setup_mcp.sql`](setup_mcp.sql) - Configures MCP access (1 min)
+> 2. [`setup_mcp.sql`](setup_mcp.sql) - Sets up everything: server + access (2 min)
 > 3. [`test_connection.sh`](test_connection.sh) - Verifies everything works (1 min)
 > 
-> Each file has instructions inside. Takes 5-7 minutes total.
+> Each file has instructions inside. Takes 5 minutes total.
 > 
 > **Or** see [`help/GETTING_STARTED.md`](help/GETTING_STARTED.md) for a visual step-by-step guide.
 
@@ -31,23 +26,6 @@ This repository provides a production-ready SQL script to provision a [Model Con
 
 ---
 
-### **Step 0: Create MCP Server** (One-time, if it doesn't exist)
-
-Open [`create_mcp_server.sql`](create_mcp_server.sql) in Snowsight.
-
-1. Click "Run All"
-2. Verify "✅ MCP server created successfully!" appears
-3. **Skip this step if the MCP server already exists in your account**
-
-**What this script does:**
-- Accepts Snowflake documentation share (requires `ACCOUNTADMIN`)
-- Creates `SNOWFLAKE_INTELLIGENCE` database and `MCP` schema
-- Creates the MCP server that exposes Snowflake docs
-
-**⚠️ Note:** If you get "Agent Server does not exist" error in Step 2, run this script first.
-
----
-
 ### **Step 1: Create Token**
 
 Open [`create_token.sql`](create_token.sql) in Snowsight.
@@ -57,7 +35,7 @@ Open [`create_token.sql`](create_token.sql) in Snowsight.
 3. **IMMEDIATELY copy the TOKEN_SECRET** value (starts with `eyJ...`)
 4. **Save it in your password manager** (you'll never see it again!)
 
-### **Step 2: Setup MCP Server**
+### **Step 2: Setup MCP**
 
 Open [`setup_mcp.sql`](setup_mcp.sql) in Snowsight.
 
@@ -66,10 +44,12 @@ Open [`setup_mcp.sql`](setup_mcp.sql) in Snowsight.
 3. **Copy the mcp_url** value
 
 **What this script does:**
+- Creates MCP server infrastructure (if it doesn't exist)
 - Creates `MCP_ACCESS_ROLE` with 4 minimal privileges
 - Grants role to your user
-- Grants role access to MCP server
 - Displays your account-specific MCP server URL
+
+**Script is idempotent** - safe to run multiple times.
 
 ---
 
@@ -249,16 +229,15 @@ See [`help/SECURITY.md`](help/SECURITY.md) for detailed analysis.
 
 ```
 .
-├── create_mcp_server.sql       # Step 0: Create MCP server (one-time per account)
 ├── create_token.sql            # Step 1: Create access token
-├── setup_mcp.sql               # Step 2: Configure MCP access with minimal privileges
-├── cleanup_mcp.sql             # Cleanup: Remove MCP resources (preserves infrastructure)
+├── setup_mcp.sql               # Step 2: Complete setup (server + access + role)
+├── cleanup_mcp.sql             # Cleanup: Remove MCP resources
 ├── test_connection.sh          # Test: Verify connection works
 ├── troubleshoot.sql            # Troubleshoot: Debug authorization issues
 ├── README.md                   # Main documentation
 └── help/                       # Additional documentation
-    ├── GETTING_STARTED.md      # Visual step-by-step guide for beginners
-    └── SECURITY.md             # Security analysis and best practices
+    ├── GETTING_STARTED.md      # Visual step-by-step guide
+    └── SECURITY.md             # Security analysis
 ```
 
 ---
@@ -316,11 +295,11 @@ ALTER USER CURRENT_USER() DROP PROGRAMMATIC ACCESS TOKEN <token_name>;
 
 ### HTTP 404 or "Agent Server does not exist"
 
-**Cause:** MCP server hasn't been created yet
+**Cause:** MCP server creation failed or insufficient privileges
 
 **Fix:**
-1. Run [`create_mcp_server.sql`](create_mcp_server.sql) to create the MCP server
-2. Then run [`setup_mcp.sql`](setup_mcp.sql) to configure access
+1. Ensure you have `ACCOUNTADMIN`, `SYSADMIN`, and `SECURITYADMIN` roles
+2. Re-run [`setup_mcp.sql`](setup_mcp.sql) - it creates the server automatically
 3. Verify with:
 ```sql
 SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;

@@ -1,45 +1,56 @@
 /*
  * Name: setup_mcp.sql
- * Synopsis: Configure MCP server access with minimal privileges
+ * Synopsis: Complete MCP server setup - creates server and configures access
  * Author: M. Whitaker
  * Created: 2025-10-21
- * Updated: 2025-10-22 (renamed from secure_pat_setup.sql)
+ * Updated: 2025-10-22
  * 
- * PREREQUISITE: You must have a PAT token already created
- * - If you don't have one, run create_token.sql first
+ * WHAT THIS DOES:
+ * 1. Creates MCP server infrastructure (if it doesn't exist)
+ * 2. Creates MCP_ACCESS_ROLE with minimal privileges
+ * 3. Grants role to your user
+ * 4. Displays your MCP server URL
+ * 
+ * PREREQUISITE: 
+ * - Run create_token.sql first to create your PAT token
+ * - Need ACCOUNTADMIN (one-time), SYSADMIN, and SECURITYADMIN roles
  * 
  * HOW TO RUN:
  * 1. Click "Run All" in Snowsight
  * 2. Look for the result with "mcp_url" column - COPY IT
- * 3. Combine with your PAT token in ~/.cursor/mcp.json
+ * 3. Combine with your PAT token in your IDE's MCP config
  * 
- * This script creates MCP_ACCESS_ROLE with ONLY 4 minimal privileges needed for MCP access.
+ * This script is IDEMPOTENT - safe to run multiple times.
  */
 
 -- ###########################################################################
--- # PREREQUISITE: Create MCP Server (FIRST TIME ONLY)
--- ###########################################################################
---
--- ⚠️  IMPORTANT: If this is your FIRST TIME running this script, you must
---    create the MCP server first. Uncomment and run these commands ONCE:
-
--- STEP 1: Accept the Snowflake Documentation share (requires ACCOUNTADMIN)
--- USE ROLE ACCOUNTADMIN;
--- CREATE DATABASE IF NOT EXISTS SNOWFLAKE_DOCUMENTATION 
---   FROM SHARE SNO_ACCOUNT.SNO_COMMON.DOCS_SHARE;
-
--- STEP 2: Create the MCP server (requires SYSADMIN)
--- USE ROLE SYSADMIN;
--- CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE;
--- CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.MCP;
--- CREATE OR REPLACE MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
---   AS CORTEX SEARCH SERVICE SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE;
-
--- After creating the MCP server above, continue with the rest of this script.
+-- # PART 1: Create MCP Server Infrastructure (if needed)
 -- ###########################################################################
 
+-- Accept Snowflake Documentation share (one-time, requires ACCOUNTADMIN)
+USE ROLE ACCOUNTADMIN;
+CREATE DATABASE IF NOT EXISTS SNOWFLAKE_DOCUMENTATION 
+  FROM SHARE SNO_ACCOUNT.SNO_COMMON.DOCS_SHARE
+  COMMENT = 'Snowflake documentation for MCP server';
+
+-- Create MCP server infrastructure (requires SYSADMIN)
+USE ROLE SYSADMIN;
+CREATE DATABASE IF NOT EXISTS SNOWFLAKE_INTELLIGENCE
+  COMMENT = 'Snowflake Intelligence features including MCP servers';
+
+CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.MCP
+  COMMENT = 'Model Context Protocol (MCP) servers';
+
+-- Create the MCP server (idempotent with CREATE OR REPLACE)
+CREATE OR REPLACE MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
+  AS CORTEX SEARCH SERVICE SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE
+  COMMENT = 'MCP server providing access to Snowflake documentation';
+
+-- Verify MCP server was created
+SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
+
 -- ###########################################################################
--- # PART 1: Create Dedicated MCP Access Role (Minimal Privileges)
+-- # PART 2: Create Dedicated MCP Access Role (Minimal Privileges)
 -- ###########################################################################
 
 -- Get current user name
@@ -52,7 +63,7 @@ CREATE ROLE IF NOT EXISTS MCP_ACCESS_ROLE
   COMMENT = 'Minimal privileges for MCP server API access via PAT tokens';
 
 -- ###########################################################################
--- # PART 2: Grant Minimal Required Privileges
+-- # PART 3: Grant Minimal Required Privileges
 -- ###########################################################################
 
 USE ROLE SYSADMIN;
@@ -72,7 +83,7 @@ GRANT USAGE ON MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
 GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE_DOCUMENTATION TO ROLE MCP_ACCESS_ROLE;
 
 -- ###########################################################################
--- # PART 3: Assign Role to Your User
+-- # PART 4: Assign Role to Your User
 -- ###########################################################################
 
 USE ROLE SECURITYADMIN;
@@ -81,7 +92,7 @@ USE ROLE SECURITYADMIN;
 GRANT ROLE MCP_ACCESS_ROLE TO USER IDENTIFIER($session_user_name);
 
 -- ###########################################################################
--- # PART 4: Update Existing PAT Token to Use MCP_ACCESS_ROLE
+-- # PART 5: Verify Token Configuration
 -- ###########################################################################
 
 -- The token was created with your current role, but we need it to use MCP_ACCESS_ROLE
@@ -92,7 +103,7 @@ GRANT ROLE MCP_ACCESS_ROLE TO USER IDENTIFIER($session_user_name);
 SHOW GRANTS TO USER IDENTIFIER($session_user_name);
 
 -- ###########################################################################
--- # PART 5: Verify Setup
+-- # PART 6: Verify Setup
 -- ###########################################################################
 
 -- Verify MCP_ACCESS_ROLE has correct privileges
@@ -109,7 +120,7 @@ SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
 DESC MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER;
 
 -- ###########################################################################
--- # PART 6: Display MCP Server URL
+-- # PART 7: Display MCP Server URL
 -- ###########################################################################
 
 -- Display your MCP server URL (for most accounts)
