@@ -34,12 +34,12 @@ USE ROLE ACCOUNTADMIN;
 CALL SYSTEM$ACCEPT_LEGAL_TERMS('DATA_EXCHANGE_LISTING', 'GZSTZ67BY9OQ4');
 
 -- Import Snowflake Documentation database from Marketplace
-CREATE OR REPLACE DATABASE SNOWFLAKE_DOCUMENTATION
-  FROM LISTING IDENTIFIER('"GZSTZ67BY9OQ4"');
+CREATE DATABASE IF NOT EXISTS SNOWFLAKE_DOCUMENTATION
+  FROM LISTING IDENTIFIER('"GZSTZ67BY9OQ4"'); -- do not alter this string
 
 -- Grant IMPORTED PRIVILEGES to PUBLIC role for MCP access
 -- NOTE: To restrict access, replace PUBLIC with your custom role
-GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE_DOCUMENTATION TO ROLE PUBLIC;
+GRANT IMPORTED PRIVILEGES ON DATABASE SNOWFLAKE_DOCUMENTATION TO ROLE MCP_ACCESS_ROLE;
 
 -- Create MCP server infrastructure (requires SYSADMIN)
 USE ROLE SYSADMIN;
@@ -50,12 +50,19 @@ CREATE SCHEMA IF NOT EXISTS SNOWFLAKE_INTELLIGENCE.MCP
   COMMENT = 'Model Context Protocol (MCP) servers';
 
 -- Create the MCP server (idempotent with CREATE OR REPLACE)
+-- Note: Provides access to Snowflake documentation via Cortex Search
 CREATE OR REPLACE MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER
-  AS CORTEX SEARCH SERVICE SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE
-  COMMENT = 'MCP server providing access to Snowflake documentation';
+  FROM SPECIFICATION $$
+    tools:
+      - name: "snowflake-docs-search"
+        type: "CORTEX_SEARCH_SERVICE_QUERY"
+        identifier: "SNOWFLAKE_DOCUMENTATION.SHARED.CKE_SNOWFLAKE_DOCS_SERVICE"
+        description: "Search Snowflake documentation using Cortex Search"
+        title: "Snowflake Documentation Search"
+  $$;
 
--- Verify MCP server was created
-SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
+-- Verify MCP server was created (optional - uncomment for debugging)
+-- SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
 
 -- ###########################################################################
 -- # PART 2: Create Dedicated MCP Access Role (Minimal Privileges)
@@ -107,22 +114,22 @@ GRANT ROLE MCP_ACCESS_ROLE TO USER IDENTIFIER($session_user_name);
 -- Unfortunately, we cannot modify the token's role after creation
 -- The token inherits all roles granted to your user, including MCP_ACCESS_ROLE
 
--- Verify your user now has MCP_ACCESS_ROLE
-SHOW GRANTS TO USER IDENTIFIER($session_user_name);
+-- Verify your user now has MCP_ACCESS_ROLE (optional - uncomment for debugging)
+-- SHOW GRANTS TO USER IDENTIFIER($session_user_name);
 
 -- ###########################################################################
 -- # PART 6: Verify Setup
 -- ###########################################################################
 
--- Verify MCP_ACCESS_ROLE has correct privileges
-SHOW GRANTS TO ROLE MCP_ACCESS_ROLE;
+-- Verify MCP_ACCESS_ROLE has correct privileges (optional - uncomment for debugging)
+-- SHOW GRANTS TO ROLE MCP_ACCESS_ROLE;
 
--- Verify your user has MCP_ACCESS_ROLE
-SHOW GRANTS TO USER IDENTIFIER($session_user_name);
+-- Verify your user has MCP_ACCESS_ROLE (optional - uncomment for debugging)
+-- SHOW GRANTS TO USER IDENTIFIER($session_user_name);
 
--- Test if MCP_ACCESS_ROLE can see the MCP server
+-- Test if MCP_ACCESS_ROLE can see the MCP server (optional - uncomment for debugging)
 USE ROLE MCP_ACCESS_ROLE;
-SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
+-- SHOW MCP SERVERS IN SCHEMA SNOWFLAKE_INTELLIGENCE.MCP;
 
 -- Test if MCP_ACCESS_ROLE can describe the MCP server
 DESC MCP SERVER SNOWFLAKE_INTELLIGENCE.MCP.SNOWFLAKE_MCP_SERVER;
