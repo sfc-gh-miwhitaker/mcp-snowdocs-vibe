@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added - Multi-IDE Configuration Support
+
+**Enhanced IDE compatibility documentation** to help users set up MCP server across different development environments.
+
+#### Documentation Enhancements
+
+- **Step 3 Configuration**: Expanded with collapsible sections for each IDE
+  - ✅ **Cursor**: Complete setup with OS-specific paths and restart instructions
+  - ✅ **Claude Desktop**: Full configuration for macOS, Windows, and Linux
+  - ✅ **VS Code**: Setup via Continue.dev extension with complete instructions
+  - ✅ **Other IDEs**: Generic configuration pattern for MCP-compatible tools
+
+- **IDE Compatibility Matrix**: New comparison table showing:
+  - MCP support status for 4 major IDEs (Cursor, Claude Desktop, VS Code, Zed)
+  - Setup complexity ratings
+  - Configuration file locations
+  - Visual indicators for each IDE
+  - Testing status
+
+- **Enhanced Troubleshooting**: IDE-specific debugging steps for Cursor, Claude Desktop, and VS Code
+
+#### Configuration Features
+
+**For Each IDE:**
+- OS-specific file paths (macOS, Windows, Linux)
+- Post-configuration verification steps
+- Visual indicators to confirm MCP is working
+- Restart instructions
+
+**Supported IDEs:**
+- Cursor (fully tested ✅)
+- Claude Desktop (fully tested ✅)
+- VS Code via Continue.dev extension (community tested ⚠️)
+- Zed (community tested ⚠️)
+
+---
+
 ## [1.3] - 2025-10-22
 
 ### Changed - File Naming Simplification

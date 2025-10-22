@@ -2,7 +2,7 @@
 
 **ONE secure approach. THREE simple steps. FIVE minutes.**
 
-This repository provides a production-ready SQL script to provision a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes Snowflake's documentation via Cortex Search to AI coding assistants (Cursor, Claude Desktop, etc.).
+This repository provides a production-ready SQL script to provision a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that exposes Snowflake's documentation via Cortex Search to AI coding assistants like **Cursor**, **Claude Desktop**, **VS Code**, and other MCP-compatible IDEs.
 
 ---
 
@@ -22,7 +22,7 @@ This repository provides a production-ready SQL script to provision a [Model Con
 ### Prerequisites
 - Snowflake account with `SYSADMIN` and `SECURITYADMIN` roles
 - Snowflake Marketplace access (one-time `ACCOUNTADMIN` for terms acceptance)
-- AI coding assistant that supports MCP (Cursor, Claude Desktop, etc.)
+- MCP-compatible IDE: **Cursor**, **Claude Desktop**, **VS Code** (with Continue.dev), **Zed**, or [others](https://modelcontextprotocol.io/implementations)
 
 ---
 
@@ -53,13 +53,18 @@ Open [`setup_mcp.sql`](setup_mcp.sql) in Snowsight.
 
 ### **Step 3: Configure Your MCP Client**
 
+Choose your IDE and follow the configuration below:
+
+<details>
+<summary><b>Cursor</b> (Click to expand)</summary>
+
 Edit `~/.cursor/mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "Snowflake": {
-      "url": "PASTE_MCP_SERVER_URL_FROM_STEP_1",
+      "url": "PASTE_MCP_SERVER_URL_FROM_STEP_2",
       "headers": {
         "Authorization": "Bearer PASTE_TOKEN_SECRET_FROM_STEP_1"
       }
@@ -68,7 +73,109 @@ Edit `~/.cursor/mcp.json`:
 }
 ```
 
-For **Claude Desktop**, edit `~/Library/Application Support/Claude/claude_desktop_config.json` with the same structure.
+**Location by OS:**
+- **macOS/Linux**: `~/.cursor/mcp.json`
+- **Windows**: `%USERPROFILE%\.cursor\mcp.json`
+
+**After editing:**
+1. Save the file
+2. Restart Cursor (Cmd+Q on Mac, Alt+F4 on Windows)
+3. The Snowflake MCP server will be available in the Composer
+
+</details>
+
+<details>
+<summary><b>Claude Desktop</b> (Click to expand)</summary>
+
+Edit Claude Desktop's configuration file:
+
+```json
+{
+  "mcpServers": {
+    "Snowflake": {
+      "url": "PASTE_MCP_SERVER_URL_FROM_STEP_2",
+      "headers": {
+        "Authorization": "Bearer PASTE_TOKEN_SECRET_FROM_STEP_1"
+      }
+    }
+  }
+}
+```
+
+**Location by OS:**
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+**After editing:**
+1. Save the file
+2. Restart Claude Desktop
+3. Look for the 🔨 (hammer) icon in the chat - it indicates MCP tools are available
+
+</details>
+
+<details>
+<summary><b>VS Code (with Continue.dev extension)</b> (Click to expand)</summary>
+
+**VS Code supports MCP through the Continue.dev extension:**
+
+1. **Install Continue.dev extension** from VS Code marketplace
+2. **Edit your Continue configuration** at `~/.continue/config.json`:
+
+```json
+{
+  "mcpServers": {
+    "snowflake": {
+      "url": "PASTE_MCP_SERVER_URL_FROM_STEP_2",
+      "headers": {
+        "Authorization": "Bearer PASTE_TOKEN_SECRET_FROM_STEP_1"
+      }
+    }
+  }
+}
+```
+
+**Location by OS:**
+- **macOS/Linux**: `~/.continue/config.json`
+- **Windows**: `%USERPROFILE%\.continue\config.json`
+
+**After editing:**
+1. Save the file
+2. Reload VS Code window (Cmd+Shift+P → "Developer: Reload Window")
+3. Open Continue panel (Cmd+L or Ctrl+L)
+4. The Snowflake MCP server will be available in Continue's context menu
+
+**Note**: Continue.dev has broader MCP support than native VS Code. For latest setup instructions, see [Continue.dev documentation](https://docs.continue.dev/).
+
+</details>
+
+<details>
+<summary><b>Other MCP-Compatible IDEs</b> (Click to expand)</summary>
+
+Any IDE that supports the [Model Context Protocol](https://modelcontextprotocol.io/) can use this server:
+
+**Configuration Pattern:**
+```json
+{
+  "mcpServers": {
+    "Snowflake": {
+      "url": "YOUR_MCP_SERVER_URL",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_SECRET"
+      }
+    }
+  }
+}
+```
+
+**Supported IDEs:**
+- ✅ Cursor
+- ✅ Claude Desktop
+- ✅ VS Code (via Continue.dev extension)
+- ✅ Zed (with MCP extension)
+- 🔄 Others (check [MCP implementation list](https://modelcontextprotocol.io/implementations))
+
+</details>
 
 ---
 
@@ -227,19 +334,57 @@ SHOW PROGRAMMATIC ACCESS TOKENS FOR USER CURRENT_USER();
 -- Create new token by re-running create_token.sql
 ```
 
-### Cursor Doesn't Show MCP Tools
+### IDE Doesn't Show MCP Tools
 
-**Checklist:**
+**For Cursor:**
 - [ ] Restarted Cursor after config change?
 - [ ] `~/.cursor/mcp.json` has valid JSON?
 - [ ] URL and token are correct (no typos)?
+- [ ] Check Cursor's MCP status in settings
+
+**For Claude Desktop:**
+- [ ] Restarted Claude Desktop after config change?
+- [ ] Config file path correct for your OS?
+- [ ] Look for 🔨 (hammer) icon in new chats
+- [ ] Check Claude Desktop logs: `~/Library/Logs/Claude/` (macOS)
+
+**For VS Code (Continue.dev):**
+- [ ] Continue.dev extension installed and enabled?
+- [ ] Reloaded VS Code window after config change?
+- [ ] Config file at `~/.continue/config.json`?
+- [ ] Open Continue panel (Cmd+L / Ctrl+L) to verify
+
+**For All IDEs:**
 - [ ] `test_connection.sh` shows HTTP 200?
+- [ ] Token hasn't expired (default: 365 days)?
+- [ ] MCP server URL uses lowercase format?
+
+---
+
+## 🔄 IDE Compatibility Matrix
+
+| Feature | Cursor | Claude Desktop | VS Code + Continue | Zed |
+|---------|--------|----------------|-------------------|-----|
+| **MCP Support** | ✅ Native | ✅ Native | ✅ Extension | ✅ Extension |
+| **Setup Complexity** | Easy | Easy | Medium | Medium |
+| **Snowflake Docs Access** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Real-time Search** | ✅ Yes | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Configuration File** | `~/.cursor/mcp.json` | OS-specific | `~/.continue/config.json` | Plugin config |
+| **Visual Indicator** | Composer tools | 🔨 icon | Continue panel (Cmd+L) | Status bar |
+| **Our Testing Status** | ✅ Verified | ✅ Verified | ⚠️ Community | ⚠️ Community |
+
+**Legend:**
+- ✅ Fully supported and tested
+- ⚠️ Supported but not extensively tested by us
+- 🔄 Planned/In development
+- ❌ Not supported
 
 ---
 
 ## 📚 Additional Resources
 
 - [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
+- [MCP Implementation List](https://modelcontextprotocol.io/implementations) - See all compatible IDEs
 - [Snowflake Managed MCP Server Documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp)
 - [Snowflake Programmatic Access Tokens](https://docs.snowflake.com/en/user-guide/authentication-using-pat)
 - [Snowflake RBAC Best Practices](https://docs.snowflake.com/user-guide/security-access-control-considerations)
