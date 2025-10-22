@@ -269,7 +269,7 @@ To remove your PAT token manually (optional):
 
 ```sql
 -- List your tokens
-SHOW PROGRAMMATIC ACCESS TOKENS FOR USER CURRENT_USER();
+SHOW PROGRAMMATIC ACCESS TOKENS;
 
 -- Drop specific token
 ALTER USER CURRENT_USER() DROP PROGRAMMATIC ACCESS TOKEN <token_name>;
@@ -329,7 +329,7 @@ Then run [`setup_mcp.sql`](setup_mcp.sql) again.
 **Fix:**
 ```sql
 -- Check expiry
-SHOW PROGRAMMATIC ACCESS TOKENS FOR USER CURRENT_USER();
+SHOW PROGRAMMATIC ACCESS TOKENS;
 
 -- Create new token by re-running create_token.sql
 ```
